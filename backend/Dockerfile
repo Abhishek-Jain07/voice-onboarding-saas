@@ -51,7 +51,7 @@ RUN mkdir -p uploads profiles
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV LOG_LEVEL=INFO
-ENV PORT=8000
+ENV PORT=7860
 
 # Run
-CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"
+CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860} --workers 1"
