@@ -31,7 +31,11 @@ const ACCEPTED_AUDIO_TYPES = [
   'audio/webm', 'audio/x-m4a',
 ];
 
-const API_ENDPOINT = '/api/process';
+const rawApiUrl = import.meta.env.VITE_API_URL || '';
+const backendBaseUrl = rawApiUrl && !rawApiUrl.startsWith('http') 
+  ? `https://${rawApiUrl}` 
+  : rawApiUrl;
+const API_ENDPOINT = backendBaseUrl ? `${backendBaseUrl}/api/process` : '/api/process';
 
 // ── Helpers ──────────────────────────────────────────────────
 function formatFileSize(bytes) {
