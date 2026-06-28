@@ -37,15 +37,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
+# Create a non-root user (required by Hugging Face Spaces)
+RUN useradd -m -u 1000 user
+
 # Copy virtualenv from builder
-COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder --chown=user:user /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application code
-COPY . .
+COPY --chown=user:user . .
 
-# Create required directories
-RUN mkdir -p uploads profiles
+# Create required directories with correct permissions
+RUN mkdir -p uploads profiles && chown -R user:user /app uploads profiles
+
+# Switch to the non-root user
+USER user
 
 # Environment
 ENV PYTHONUNBUFFERED=1
