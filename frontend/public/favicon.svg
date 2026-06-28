@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#A8D5BA"/>
+      <stop offset="100%" style="stop-color:#FFD966"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#bg)"/>
+  <g transform="translate(32,32)">
+    <!-- Sunflower petals -->
+    <ellipse cx="0" cy="-16" rx="4" ry="8" fill="#FFD966" opacity="0.8"/>
+    <ellipse cx="0" cy="-16" rx="4" ry="8" fill="#FFD966" opacity="0.8" transform="rotate(45)"/>
+    <ellipse cx="0" cy="-16" rx="4" ry="8" fill="#FFD966" opacity="0.8" transform="rotate(90)"/>
+    <ellipse cx="0" cy="-16" rx="4" ry="8" fill="#FFD966" opacity="0.8" transform="rotate(135)"/>
+    <ellipse cx="0" cy="-16" rx="4" ry="8" fill="#FFD966" opacity="0.8" transform="rotate(180)"/>
+    <ellipse cx="0" cy="-16" rx="4" ry="8" fill="#FFD966" opacity="0.8" transform="rotate(225)"/>
+    <ellipse cx="0" cy="-16" rx="4" ry="8" fill="#FFD966" opacity="0.8" transform="rotate(270)"/>
+    <ellipse cx="0" cy="-16" rx="4" ry="8" fill="#FFD966" opacity="0.8" transform="rotate(315)"/>
+    <!-- Microphone center -->
+    <rect x="-4" y="-8" width="8" height="12" rx="4" fill="#2D3436"/>
+    <path d="M-6,4 Q-6,10 0,10 Q6,10 6,4" fill="none" stroke="#2D3436" stroke-width="2"/>
+    <line x1="0" y1="10" x2="0" y2="14" stroke="#2D3436" stroke-width="2"/>
+    <line x1="-4" y1="14" x2="4" y2="14" stroke="#2D3436" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>
