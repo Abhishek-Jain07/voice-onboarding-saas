@@ -643,7 +643,8 @@ function App() {
       setPipelineStep(-1);
 
       if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
-        setError('Could not connect to the server. Make sure the backend is running at ' + window.location.origin + API_ENDPOINT);
+        const displayUrl = API_ENDPOINT.startsWith('http') ? API_ENDPOINT : window.location.origin + API_ENDPOINT;
+        setError(`Could not connect to the server. Make sure the backend is running at ${displayUrl}`);
       } else {
         setError(err.message || 'An unexpected error occurred. Please try again.');
       }
