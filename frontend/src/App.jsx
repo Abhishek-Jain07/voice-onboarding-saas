@@ -604,7 +604,8 @@ function App() {
       formData.append('api_key', apiKey.trim());
       formData.append('provider', provider);
 
-      const response = await fetch(API_ENDPOINT, {
+      const fetchUrl = `${API_ENDPOINT}?t=${Date.now()}`;
+      const response = await fetch(fetchUrl, {
         method: 'POST',
         body: formData,
       });
