@@ -1,6 +1,7 @@
 """
-Response Formatter Service
+Response Formatter Service (v2 – Per-Question Data)
 - Format the complete response with all intermediate results + final dating profile
+- Include per-question analyses and aggregation statistics
 - Collect timing and metadata
 """
 
@@ -24,12 +25,14 @@ class ResponseFormatterService(BaseService):
             - session_id
             - transcript (STT result)
             - normalized_transcript
-            - audio_features
-            - emotion
-            - sentiment
-            - interests
-            - personality
-            - keywords_entities
+            - segmentation
+            - question_analyses (list of per-question results)
+            - audio_features (aggregated)
+            - emotion (aggregated)
+            - sentiment (aggregated)
+            - interests (aggregated)
+            - personality (aggregated)
+            - keywords_entities (aggregated)
             - conversation_summary
             - aggregated_profile
             - dating_profile
@@ -46,11 +49,25 @@ class ResponseFormatterService(BaseService):
                 return {
                     k: clean(v)
                     for k, v in d.items()
-                    if k not in ("_meta", "processed_audio", "fallback_reason", "mock")
+                    if k not in ("_meta", "processed_audio", "fallback_reason",
+                                 "mock", "_errors")
                 }
             if isinstance(d, list):
                 return [clean(item) for item in d]
             return d
+
+        # Clean per-question analyses
+        question_analyses = input_data.get("question_analyses", [])
+        clean_qa = []
+        for qa in question_analyses:
+            cleaned = clean(qa)
+            # Remove internal error list from each question analysis
+            cleaned.pop("_errors", None)
+            clean_qa.append(cleaned)
+
+        # Extract aggregation stats
+        aggregated = input_data.get("aggregated_profile", {})
+        aggregation_stats = aggregated.get("aggregation_stats", {})
 
         response = {
             "success": len(input_data.get("errors", [])) == 0,
@@ -64,8 +81,12 @@ class ResponseFormatterService(BaseService):
             "personality": clean(input_data.get("personality")),
             "keywords_entities": clean(input_data.get("keywords_entities")),
             "conversation_summary": clean(input_data.get("conversation_summary")),
-            "aggregated_profile": clean(input_data.get("aggregated_profile")),
+            "aggregated_profile": clean(aggregated),
             "dating_profile": clean(input_data.get("dating_profile")),
+            # ── New per-question data ────────────────────────────────
+            "question_analyses": clean_qa,
+            "aggregation_stats": aggregation_stats,
+            # ── Meta ─────────────────────────────────────────────────
             "llm_prompt": input_data.get("llm_prompt"),
             "llm_raw_response": input_data.get("llm_raw_response"),
             "timings": input_data.get("timings", {"total_ms": 0, "steps": {}}),
@@ -84,5 +105,7 @@ class ResponseFormatterService(BaseService):
             "errors": [str(error)] + input_data.get("errors", []),
             "timings": input_data.get("timings", {}),
             "service_meta": input_data.get("service_meta", []),
+            "question_analyses": [],
+            "aggregation_stats": {},
             "fallback_reason": str(error),
         }

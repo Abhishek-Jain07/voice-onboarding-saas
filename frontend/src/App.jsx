@@ -17,9 +17,9 @@ const PROVIDERS = [
 
 const PIPELINE_STEPS = [
   { id: 'preprocessing', label: 'Audio Preprocessing', icon: '🎵' },
-  { id: 'stt', label: 'Speech-to-Text', icon: '📝' },
-  { id: 'normalization', label: 'Text Normalization', icon: '✏️' },
-  { id: 'analysis', label: 'AI Analysis', icon: '🔬' },
+  { id: 'stt', label: 'Speech-to-Text & Timestamps', icon: '📝' },
+  { id: 'normalization', label: 'Question Detection', icon: '❓' },
+  { id: 'analysis', label: 'Per-Question AI Analysis', icon: '🔬' },
   { id: 'aggregation', label: 'Data Aggregation', icon: '📊' },
   { id: 'llm', label: 'LLM Profile Generation', icon: '🧠' },
   { id: 'profile', label: 'Profile Assembly', icon: '👤' },
@@ -725,9 +725,131 @@ function App() {
 
         {/* Results Dashboard */}
         {results && <ResultsDashboard results={results} />}
+
+        {/* Question Analytics */}
+        {results && results.question_analyses && (
+          <QuestionAnalytics
+            questionAnalyses={results.question_analyses}
+            aggregationStats={results.aggregation_stats || {}}
+          />
+        )}
       </main>
 
     </div>
+  );
+}
+
+// ── Question Analytics ────────────────────────────────────────
+function QuestionAnalytics({ questionAnalyses, aggregationStats }) {
+  if (!questionAnalyses || questionAnalyses.length === 0) return null;
+
+  const getEmotionColor = (emotion) => {
+    const colors = {
+      Happy: '#4CAF50',
+      Sad: '#5C6BC0',
+      Angry: '#EF5350',
+      Calm: '#26C6DA',
+      Neutral: '#9E9E9E',
+      Fearful: '#AB47BC',
+      Excited: '#FF9800',
+      Surprised: '#FF7043'
+    };
+    return colors[emotion] || '#9E9E9E';
+  };
+
+  const detected = aggregationStats?.total_questions_detected || 0;
+  const possible = aggregationStats?.total_questions_possible || 35;
+  const consistency = aggregationStats?.consistency_score || 0;
+  const avgConfidence = aggregationStats?.avg_confidence || 0;
+  const emotionDist = aggregationStats?.emotion_distribution || {};
+
+  return (
+    <section className="question-analytics" id="analytics-section">
+      <div className="results-dashboard__header">
+        <h2 className="results-dashboard__title">
+          <span className="results-dashboard__title-icon">📊</span>
+          Question Analytics
+        </h2>
+      </div>
+
+      <div className="analytics-overview">
+        <div className="analytics-stat">
+          <span className="analytics-stat__label">Questions Detected</span>
+          <span className="analytics-stat__value">{detected} / {possible}</span>
+        </div>
+        <div className="analytics-stat">
+          <span className="analytics-stat__label">Consistency Score</span>
+          <span className="analytics-stat__value">{(consistency * 100).toFixed(0)}%</span>
+        </div>
+        <div className="analytics-stat">
+          <span className="analytics-stat__label">Avg Confidence</span>
+          <span className="analytics-stat__value">{(avgConfidence * 100).toFixed(0)}%</span>
+        </div>
+      </div>
+
+      {Object.keys(emotionDist).length > 0 && (
+        <div className="analytics-emotion-dist">
+          <h3 className="analytics-subtitle">Emotion Distribution</h3>
+          <div className="emotion-bar">
+            {Object.entries(emotionDist).map(([emotion, percent]) => (
+              <div 
+                key={emotion} 
+                className="emotion-bar__segment" 
+                style={{ 
+                  width: `${percent * 100}%`,
+                  backgroundColor: getEmotionColor(emotion)
+                }}
+                title={`${emotion}: ${(percent * 100).toFixed(0)}%`}
+              />
+            ))}
+          </div>
+          <div className="emotion-legend">
+            {Object.entries(emotionDist).map(([emotion, percent]) => (
+              <div key={emotion} className="emotion-legend__item">
+                <span className="emotion-legend__dot" style={{ backgroundColor: getEmotionColor(emotion) }} />
+                <span className="emotion-legend__label">{emotion} {(percent * 100).toFixed(0)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <h3 className="analytics-subtitle">Per-Question Breakdown</h3>
+      <div className="question-list">
+        {questionAnalyses.map((qa, index) => {
+          const primaryEmotion = qa.emotion?.primary_emotion || 'Neutral';
+          const emotionConf = qa.emotion?.confidence || 0;
+          const sentLabel = qa.sentiment?.overall_label || 'NEUTRAL';
+          const sentScore = qa.sentiment?.overall_score || 0;
+          
+          return (
+            <div key={index} className="question-card" style={{ animationDelay: `${(index % 10) * 0.1}s` }}>
+              <div className="question-card__header">
+                <span className="question-card__id">Q{qa.question_id || index + 1}</span>
+                <span className="question-card__text">{qa.question_text || 'Unknown Question'}</span>
+              </div>
+              <div className="question-card__metrics">
+                <div className="question-card__metric">
+                  <span className="emotion-legend__dot" style={{ backgroundColor: getEmotionColor(primaryEmotion) }} />
+                  {primaryEmotion} ({(emotionConf * 100).toFixed(0)}%)
+                </div>
+                <div className="question-card__metric">
+                  {sentLabel === 'POSITIVE' ? '🟢' : sentLabel === 'NEGATIVE' ? '🔴' : '⚪'} 
+                  {sentLabel} ({sentScore.toFixed(2)})
+                </div>
+              </div>
+              {qa.answer_text && (
+                <div className="question-card__answer">
+                  <div className="question-card__answer-text">
+                    "{qa.answer_text}"
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </section>
   );
 }
 
